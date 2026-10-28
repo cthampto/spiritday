@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spirit Day VIP Kiosk - Ross-Ade Stadium</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #000; color: #CFB991; text-align: center; padding: 3rem 1rem; }
+    .card { max-width: 480px; margin: 0 auto; border: 3px solid #CFB991; border-radius: 12px; padding: 2rem; }
+    h1 { margin-top: 0; }
+    button { background: #CFB991; color: #000; font-size: 1.1rem; font-weight: bold; border: 0; border-radius: 6px; padding: .75rem 1.5rem; cursor: pointer; }
+    button:disabled { background: #555; color: #999; cursor: not-allowed; }
+    #output { margin-top: 1.5rem; font-weight: bold; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Gold &amp; Black VIP Pass</h1>
+    <p>Price: $0</p>
+    <p>Checkout is restricted to administrators on an internal CIT subnet.</p>
+    <!-- TODO: Remove debug cookie 'is_spirit_vip=false' before production deployment! -->
+    <button id="vip-btn" disabled onclick="verifyCheckout()">Claim VIP Pass</button>
+    <div id="output"></div>
+  </div>
+  <script>
+    document.cookie = "is_spirit_vip=false; path=/; SameSite=Lax";
+
+    function verifyCheckout() {
+      if (document.cookie.includes("is_spirit_vip=true")) {
+        document.getElementById("output").innerText =
+          "SUCCESS! Flag: BOILERUP{Cl13nt_S1d3_Ch3ck5_Ar3_N0t_S4f3}";
+      } else {
+        alert("Unauthorized! Administrator cookie missing.");
+      }
+    }
+  </script>
+</body>
+</html>
