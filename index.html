@@ -18,18 +18,29 @@
     <h1>Gold &amp; Black VIP Pass</h1>
     <p>Price: $0</p>
     <p>Checkout is restricted to administrators on an internal CIT subnet.</p>
-    <!-- TODO: Remove debug cookie 'is_spirit_vip=false' before production deployment! -->
-    <button id="vip-btn" disabled onclick="verifyCheckout()">Claim VIP Pass</button>
+    <button id="vip-btn" onclick="verifyCheckout()">Claim VIP Pass</button>
     <div id="output"></div>
   </div>
   <script>
     document.cookie = "is_spirit_vip=false; path=/; SameSite=Lax";
 
-    function verifyCheckout() {
-      if (document.cookie.includes("is_spirit_vip=true")) {
-        document.getElementById("output").innerText =
-          "SUCCESS! Flag: BOILERUP{Cl13nt_S1d3_Ch3ck5_Ar3_N0t_S4f3}";
-      } else {
+    const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const BLOB = {
+      salt: "nTM0pS6KIAGVg8uAY1zAVg==",
+      iv: "Nni9JlmPPEWbUWZA",
+      data: "9cSxf22dRNT1QFy6a6aIRCV2W1vdQ45nGRKSrbnqrqfclTmIPcDbk2QrPcdgmZ6+nMJTKQEPt1bV"
+    };
+
+    async function verifyCheckout() {
+      const m = document.cookie.match(/(?:^|; )is_spirit_vip=([^;]*)/);
+      try {
+        const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(m ? m[1] : ""), "PBKDF2", false, ["deriveKey"]);
+        const key = await crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt: b64(BLOB.salt), iterations: 200000, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+        const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(BLOB.iv) }, key, b64(BLOB.data));
+        document.getElementById("output").innerText = "SUCCESS! Flag: " + new TextDecoder().decode(plain);
+      } catch (e) {
         alert("Unauthorized! Administrator cookie missing.");
       }
     }
