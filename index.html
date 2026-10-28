@@ -5,22 +5,232 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Spirit Day VIP Kiosk - Ross-Ade Stadium</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #000; color: #CFB991; text-align: center; padding: 3rem 1rem; }
-    .card { max-width: 480px; margin: 0 auto; border: 3px solid #CFB991; border-radius: 12px; padding: 2rem; }
-    h1 { margin-top: 0; }
-    button { background: #CFB991; color: #000; font-size: 1.1rem; font-weight: bold; border: 0; border-radius: 6px; padding: .75rem 1.5rem; cursor: pointer; }
-    button:disabled { background: #555; color: #999; cursor: not-allowed; }
-    #output { margin-top: 1.5rem; font-weight: bold; word-break: break-all; }
+    :root {
+      color-scheme: dark;
+      --gold: #cfb991;
+      --gold-bright: #f0d7a1;
+      --ink: #171611;
+      --paper: #f7f2e7;
+      --muted: #716b5f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 3rem 1.25rem;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 50% 5%, rgb(207 185 145 / 16%), transparent 42rem),
+        radial-gradient(circle at 8% 85%, rgb(207 185 145 / 8%), transparent 22rem),
+        #10100e;
+      color: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .page { width: min(100%, 720px); text-align: center; }
+
+    .eyebrow {
+      margin: 0 0 1.25rem;
+      color: var(--gold);
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      position: relative;
+      padding: clamp(1.25rem, 5vw, 2.25rem);
+      border: 1px solid rgb(207 185 145 / 50%);
+      border-radius: 1.5rem;
+      background: linear-gradient(145deg, rgb(255 255 255 / 5%), transparent 55%);
+      box-shadow: 0 28px 90px rgb(0 0 0 / 55%), 0 0 50px rgb(207 185 145 / 8%);
+    }
+
+    .ticket {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 112px;
+      overflow: hidden;
+      border: 1px solid #dfcfad;
+      border-radius: 1rem;
+      background:
+        radial-gradient(circle at 15% 15%, rgb(255 255 255 / 80%), transparent 25rem),
+        var(--paper);
+      color: var(--ink);
+      text-align: left;
+      box-shadow: 0 14px 36px rgb(0 0 0 / 28%);
+    }
+
+    .ticket-main { padding: clamp(1.5rem, 5vw, 2.5rem); }
+
+    .ticket-brand {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      color: #6a5631;
+      font-size: .7rem;
+      font-weight: 850;
+      letter-spacing: .16em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 2rem;
+      aspect-ratio: 1;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--gold-bright);
+      font-family: Georgia, serif;
+      font-size: .9rem;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 1.6rem 0 .45rem;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.15rem, 8vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -.055em;
+      line-height: .98;
+    }
+
+    .subtitle { margin: 0; color: var(--muted); font-size: .95rem; }
+
+    .ticket-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem 1.25rem;
+      margin: 1.75rem 0 1.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid #ded5c5;
+    }
+
+    .detail-label {
+      display: block;
+      margin-bottom: .3rem;
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .detail-value { font-size: .9rem; font-weight: 750; }
+    .price { color: #795b27; }
+
+    .ticket-stub {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.5rem .75rem;
+      border-left: 1px dashed #b6a784;
+      background: rgb(207 185 145 / 16%);
+      text-align: center;
+    }
+
+    .stub-label {
+      color: #6a5631;
+      font-size: .65rem;
+      font-weight: 850;
+      letter-spacing: .16em;
+      writing-mode: vertical-rl;
+    }
+
+    .barcode {
+      width: 48px;
+      height: 74px;
+      background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px);
+      opacity: .8;
+    }
+
+    .ticket-number { color: var(--muted); font-size: .65rem; font-weight: 750; letter-spacing: .1em; }
+
+    .notice {
+      margin: 1.25rem 0;
+      color: #655f53;
+      font-size: .82rem;
+      line-height: 1.55;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 1px solid #ead8b2;
+      border-radius: .75rem;
+      background: linear-gradient(135deg, #dfc58e, var(--gold));
+      box-shadow: 0 8px 22px rgb(115 84 32 / 22%), inset 0 1px rgb(255 255 255 / 60%);
+      color: #171611;
+      cursor: pointer;
+      font: inherit;
+      font-size: .95rem;
+      font-weight: 850;
+      letter-spacing: .02em;
+      transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+    }
+
+    button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgb(115 84 32 / 30%); filter: brightness(1.06); }
+    button:active { transform: translateY(0); }
+    button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    button:disabled { background: #777; color: #ccc; cursor: not-allowed; }
+
+    #output {
+      margin-top: 1rem;
+      color: var(--ink);
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 2rem 1rem; }
+      .ticket { grid-template-columns: 1fr; }
+      .ticket-stub {
+        flex-direction: row;
+        min-height: 70px;
+        padding: .75rem 1.25rem;
+        border-top: 1px dashed #b6a784;
+        border-left: 0;
+      }
+      .stub-label { writing-mode: initial; }
+      .barcode { width: 72px; height: 32px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Gold &amp; Black VIP Pass</h1>
-    <p>Price: $0</p>
-    <p>Checkout is restricted to administrators on an internal CIT subnet.</p>
-    <button id="vip-btn" onclick="verifyCheckout()">Claim VIP Pass</button>
-    <div id="output"></div>
-  </div>
+  <main class="page">
+    <p class="eyebrow">Ross-Ade Stadium · Spirit Day</p>
+    <section class="card" aria-label="VIP pass claim">
+      <div class="ticket">
+        <div class="ticket-main">
+          <div class="ticket-brand"><span class="brand-mark" aria-hidden="true">P</span> PURDUE · VIP ADMISSION</div>
+          <h1>Gold &amp; Black<br>VIP Pass</h1>
+          <p class="subtitle">Your all-access pass to Spirit Day.</p>
+          <div class="ticket-details">
+            <div><span class="detail-label">Admission</span><span class="detail-value">VIP · General</span></div>
+            <div><span class="detail-label">Price</span><span class="detail-value price">$0.00</span></div>
+          </div>
+          <button id="vip-btn" onclick="verifyCheckout()">Claim VIP Pass <span aria-hidden="true">→</span></button>
+          <p class="notice">Checkout is restricted to administrators on an internal CIT subnet.</p>
+          <div id="output" aria-live="polite"></div>
+        </div>
+        <aside class="ticket-stub" aria-label="Ticket details">
+          <span class="stub-label">SPIRIT DAY</span>
+          <span class="barcode" aria-hidden="true"></span>
+          <span class="ticket-number">VIP · 0001</span>
+        </aside>
+      </div>
+    </section>
+  </main>
   <script>
     document.cookie = "is_spirit_vip=false; path=/; SameSite=Lax";
 
